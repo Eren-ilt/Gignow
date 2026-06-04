@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gignow — Book Live Music</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:#0c0c0e;color:#f5f2ec;-webkit-font-smoothing:antialiased;}
+:root{
+  --bg:#0c0c0e;--bg2:#161618;--bg3:#1e1e21;--bg4:#2a2a2d;
+  --cream:#f5f2ec;--muted:#8e8e93;--border:rgba(255,255,255,0.1);
+  --gold:#c9a84c;--gold2:rgba(201,168,76,0.15);
+  --green:#30d158;--red:#ff453a;
+}
+::-webkit-scrollbar{display:none;}
+
+/* ── WRAPPER ── */
+#app{display:flex;justify-content:center;align-items:center;min-height:100vh;padding:24px;background:#1a1714;}
+
+/* ── PHONE ── */
+.phone{
+  width:390px;height:844px;
+  background:var(--bg);
+  border-radius:54px;
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  box-shadow:0 0 0 12px #1c1c1e, 0 0 0 14px #2c2c2e, 0 40px 100px rgba(0,0,0,0.6);
+  position:relative;flex-shrink:0;
+}
+
+/* ── STATUS BAR ── */
+.sbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 24px 6px;background:var(--bg);position:relative;z-index:5;
+}
+.sbar-time{font-size:15px;font-weight:700;color:var(--cream);}
+.sbar-notch{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:120px;height:34px;background:var(--bg);border-radius:0 0 22px 22px;z-index:10;
+}
+.sbar-icons{display:flex;gap:5px;align-items:center;font-size:13px;color:var(--cream);}
+
+/* ── SCREEN ── */
+.screen{flex:1;overflow:hidden;display:flex;flex-direction:column;position:relative;}
+.scroll{flex:1;overflow-y:auto;overflow-x:hidden;}
+.scroll::-webkit-scrollbar{display:none;}
+
+/* ── PAGES ── */
+.page{display:none;flex-direction:column;height:100%;}
+.page.on{display:flex;}
+
+/* ── TAB BAR ── */
+.tabbar{
+  display:flex;background:var(--bg);
+  border-top:1px solid var(--border);
+  padding:8px 0 22px;
+}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:none;cursor:pointer;padding:4px 0;}
+.tab-icon{font-size:23px;color:var(--muted);transition:color .2s;}
+.tab-label{font-size:10px;font-weight:600;color:var(--muted);transition:color .2s;}
+.tab.on .tab-icon,.tab.on .tab-label{color:var(--gold);}
+
+/* ── PILL ── */
+.pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:50px;font-size:10px;font-weight:600;background:var(--gold2);color:var(--gold);}
+.pill.g{background:rgba(48,209,88,.12);color:var(--green);}
+.pill.r{background:rgba(255,69,58,.12);color:var(--red);}
+
+/* ── CHIP ── */
+.chip{flex-shrink:0;padding:7px 15px;border-radius:50px;font-size:12px;font-weight:600;border:none;cursor:pointer;background:var(--bg3);color:var(--muted);transition:all .15s;}
+.chip.on{background:var(--cream);color:var(--bg);}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;}
+.chips::-webkit-scrollbar{display:none;}
+
+/* ── ARTIST CARD ── */
+.acard{background:var(--bg2);border-radius:18px;overflow:hidden;cursor:pointer;margin-bottom:12px;}
+.acard-img{height:120px;display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;}
+.acard-body{padding:12px 15px 15px;}
+.acard-name{font-family:'Playfair Display',serif;font-size:17px;color:var(--cream);}
+.acard-meta{font-size:12px;color:var(--muted);margin:3px 0 10px;}
+.acard-foot{display:flex;justify-content:space-between;align-items:center;}
+.acard-price{font-size:15px;font-weight:700;color:var(--cream);}
+.acard-price small{font-size:11px;font-weight:300;color:var(--muted);}
+
+/* ── FEAT CARD ── */
+.fcard{flex-shrink:0;width:168px;background:var(--bg2);border-radius:16px;overflow:hidden;cursor:pointer;}
+.fcard-img{height:96px;display:flex;align-items:center;justify-content:center;font-size:36px;position:relative;}
+.fcard-body{padding:10px 12px 12px;}
+.fcard-name{font-family:'Playfair Display',serif;font-size:14px;color:var(--cream);margin-bottom:2px;}
+.fcard-city{font-size:11px;color:var(--muted);margin-bottom:6px;}
+.fcard-price{font-size:14px;font-weight:700;color:var(--cream);}
+
+/* ── STAT BOX ── */
+.sbox{background:var(--bg2);border-radius:12px;padding:10px;text-align:center;}
+.sbox-val{font-size:16px;font-weight:700;color:var(--cream);}
+.sbox-lbl{font-size:10px;color:var(--muted);margin-top:2px;}
+
+/* ── REVIEW CARD ── */
+.rcard{background:var(--bg3);border-radius:14px;padding:14px;margin-bottom:10px;}
+.rcard-text{font-family:'Playfair Display',serif;font-size:13px;font-style:italic;color:var(--cream);line-height:1.6;margin-bottom:8px;}
+.rcard-author{font-size:11px;font-weight:600;color:var(--muted);}
+
+/* ── BOOKING SHEET ── */
+.sheet-wrap{position:absolute;inset:0;background:rgba(0,0,0,.6);z-index:30;display:none;backdrop-filter:blur(4px);}
+.sheet-wrap.on{display:block;}
+.sheet{position:absolute;bottom:0;left:0;right:0;background:var(--bg2);border-radius:24px 24px 0 0;z-index:40;padding:0 16px 32px;max-height:88%;overflow-y:auto;transform:translateY(100%);transition:transform .32s cubic-bezier(.4,0,.2,1);}
+.sheet.on{transform:translateY(0);}
+.sheet::-webkit-scrollbar{display:none;}
+.sheet-handle{width:36px;height:4px;background:var(--bg4);border-radius:2px;margin:12px auto 18px;}
+.sheet-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:400;color:var(--cream);margin-bottom:18px;letter-spacing:-.3px;}
+
+/* ── FIELD ── */
+.field{background:var(--bg3);border-radius:12px;padding:11px 14px;margin-bottom:9px;}
+.field-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:5px;}
+.field input,.field select{width:100%;border:none;background:transparent;font-size:14px;color:var(--cream);outline:none;font-family:'DM Sans',sans-serif;}
+.field input::placeholder{color:var(--muted);}
+.field select option{background:#1e1e21;}
+
+/* ── DUR BTNS ── */
+.dur-btns{display:flex;gap:5px;margin-top:4px;}
+.dur-btn{flex:1;padding:8px 0;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:700;background:var(--bg4);color:var(--muted);transition:all .15s;}
+.dur-btn.on{background:var(--gold);color:#111;}
+
+/* ── TOTAL BOX ── */
+.total-box{background:var(--gold2);border:1px solid rgba(201,168,76,.25);border-radius:12px;padding:13px 15px;margin-bottom:14px;}
+.total-row{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:4px;}
+.total-line{height:1px;background:rgba(201,168,76,.2);margin:9px 0;}
+.total-final{display:flex;justify-content:space-between;font-size:15px;font-weight:700;color:var(--cream);}
+.total-final span:last-child{color:var(--gold);}
+
+/* ── BUTTONS ── */
+.btn-gold{width:100%;padding:15px;border-radius:14px;border:none;background:var(--gold);color:#111;font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:filter .2s;}
+.btn-gold:hover{filter:brightness(1.08);}
+.btn-outline{width:100%;padding:15px;border-radius:14px;border:1px solid var(--border);background:transparent;color:var(--cream);font-size:15px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:10px;}
+
+/* ── TOAST ── */
+.toast{position:absolute;bottom:92px;left:14px;right:14px;z-index:50;background:#1c1c1e;border:1px solid var(--border);border-radius:14px;padding:12px 16px;display:none;align-items:center;gap:10px;animation:tup .28s ease;}
+.toast.on{display:flex;}
+.toast-icon{font-size:18px;}
+.toast-msg{font-size:13px;font-weight:600;color:var(--cream);}
+@keyframes tup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── SECTION LABEL ── */
+.sec-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:10px;}
+
+/* ── DETAIL PAGE ── */
+.detail-back{position:absolute;top:14px;left:14px;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.5);border:none;color:var(--cream);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:20px;z-index:5;backdrop-filter:blur(6px);}
+.sticky-bar{position:sticky;bottom:0;padding:10px 16px 16px;background:linear-gradient(transparent,var(--bg) 45%);}
+.sticky-inner{display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border-radius:18px;padding:12px 16px;border:1px solid var(--border);}
+
+/* ── HOW IT WORKS PAGE ── */
+.how-step{background:var(--bg2);border-radius:16px;padding:22px;margin-bottom:10px;display:flex;gap:16px;align-items:flex-start;}
+.how-num{font-family:'Playfair Display',serif;font-size:32px;font-weight:400;color:rgba(255,255,255,.08);line-height:1;flex-shrink:0;width:36px;}
+.how-icon{font-size:26px;margin-bottom:8px;}
+.how-title{font-family:'Playfair Display',serif;font-size:18px;color:var(--cream);margin-bottom:6px;}
+.how-desc{font-size:13px;color:var(--muted);line-height:1.7;font-weight:300;}
+
+/* ── SIDE LABEL ── */
+.side-info{position:absolute;left:calc(50% + 215px);top:50%;transform:translateY(-50%);width:200px;}
+.side-info h3{font-family:'Playfair Display',serif;font-size:20px;font-weight:400;color:#c8c0b4;margin-bottom:10px;}
+.side-info p{font-size:12px;color:#6b6460;line-height:1.7;}
+.side-info .feature{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;color:#7a7470;}
+.side-info .feature span:first-child{font-size:16px;}
+
+@media(max-width:700px){
+  #app{padding:0;align-items:flex-start;}
+  .phone{width:100%;height:100vh;border-radius:0;box-shadow:none;}
+  .side-info{display:none;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="phone">
+
+    <!-- STATUS BAR -->
+    <div class="sbar">
+      <span class="sbar-time" id="clock">9:41</span>
+      <div class="sbar-notch"></div>
+      <div class="sbar-icons">
+        <span style="font-size:12px;">●●●</span>
+        <span style="font-size:14px;">⚡</span>
+      </div>
+    </div>
+
+    <!-- SCREEN -->
+    <div class="screen">
+
+      <!-- ══ HOME PAGE ══ -->
+      <div class="page on" id="pg-home">
+        <div class="scroll" style="padding:16px 16px 0;">
+          <p style="font-size:12px;color:var(--muted);margin-bottom:4px;" id="greeting">Good evening 👋</p>
+          <h1 style="font-family:'Playfair Display',serif;font-size:28px;font-weight:400;color:var(--cream);letter-spacing:-.5px;line-height:1.2;margin-bottom:16px;">
+            Find live music<br/><span style="color:var(--gold);">near you.</span>
+          </h1>
+
+          <!-- Search tap -->
+          <div onclick="goTab('search')" style="display:flex;align-items:center;gap:10px;background:var(--bg3);border-radius:12px;padding:11px 14px;margin-bottom:16px;cursor:pointer;">
+            <span style="font-size:16px;">🔍</span>
+            <span style="font-size:14px;color:var(--muted);">Search artists, city, genre…</span>
+          </div>
+
+          <!-- Type chips -->
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:7px;">Type of artist</div>
+          <div class="chips" id="home-chips" style="margin-bottom:14px;">
+            <button class="chip on" onclick="homeFilter(this,'')">All</button>
+            <button class="chip" onclick="homeFilter(this,'DJ')">DJ</button>
+            <button class="chip" onclick="homeFilter(this,'Jazz Band')">Jazz Band</button>
+            <button class="chip" onclick="homeFilter(this,'Pianist')">Pianist</button>
+            <button class="chip" onclick="homeFilter(this,'Saxophonist')">Saxophone</button>
+            <button class="chip" onclick="homeFilter(this,'String Quartet')">Strings</button>
+          </div>
+
+          <!-- Location chips -->
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:7px;">Location</div>
+          <div class="chips" id="home-city-chips" style="margin-bottom:18px;">
+            <button class="chip on" onclick="homeCityFilter(this,'')">All cities</button>
+            <button class="chip" onclick="homeCityFilter(this,'Zürich')">Zürich</button>
+            <button class="chip" onclick="homeCityFilter(this,'Basel')">Basel</button>
+            <button class="chip" onclick="homeCityFilter(this,'Bern')">Bern</button>
+            <button class="chip" onclick="homeCityFilter(this,'Geneva')">Geneva</button>
+            <button class="chip" onclick="homeCityFilter(this,'Lucerne')">Lucerne</button>
+          </div>
+
+          <!-- Featured -->
+          <div class="sec-lbl">Top picks ✦</div>
+          <div class="chips" id="feat-row" style="margin-left:-16px;padding-left:16px;margin-right:-16px;padding-right:16px;margin-bottom:18px;gap:12px;"></div>
+
+          <!-- All artists -->
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div class="sec-lbl">All artists</div>
+            <span id="home-count" style="font-size:11px;color:var(--muted);"></span>
+          </div>
+          <div id="home-list"></div>
+          <div style="height:20px;"></div>
+        </div>
+      </div>
+
+      <!-- ══ SEARCH PAGE ══ -->
+      <div class="page" id="pg-search">
+        <div style="padding:16px 16px 10px;background:var(--bg);position:sticky;top:0;z-index:10;">
+          <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:400;color:var(--cream);margin-bottom:14px;">Search</h2>
+          <div style="display:flex;align-items:center;gap:10px;background:var(--bg3);border-radius:12px;padding:10px 14px;margin-bottom:10px;">
+            <span style="font-size:16px;">🔍</span>
+            <input id="sq" placeholder="Artist, genre, city…" oninput="renderSearch()" style="flex:1;border:none;background:transparent;font-size:14px;color:var(--cream);outline:none;font-family:'DM Sans',sans-serif;"/>
+          </div>
+          <div class="chips" id="city-chips" style="margin-bottom:8px;">
+            <button class="chip on" onclick="setCity(this,'')">All cities</button>
+            <button class="chip" onclick="setCity(this,'Zürich')">Zürich</button>
+            <button class="chip" onclick="setCity(this,'Basel')">Basel</button>
+            <button class="chip" onclick="setCity(this,'Bern')">Bern</button>
+            <button class="chip" onclick="setCity(this,'Geneva')">Geneva</button>
+          </div>
+          <div class="chips" id="type-chips">
+            <button class="chip on" onclick="setType(this,'')">All</button>
+            <button class="chip" onclick="setType(this,'DJ')">DJ</button>
+            <button class="chip" onclick="setType(this,'Jazz Band')">Jazz</button>
+            <button class="chip" onclick="setType(this,'Pianist')">Piano</button>
+            <button class="chip" onclick="setType(this,'Live Band')">Band</button>
+            <button class="chip" onclick="setType(this,'Saxophonist')">Sax</button>
+          </div>
+          <!-- Sort -->
+          <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+            <span style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px;">Sort:</span>
+            <div class="chips" id="sort-chips">
+              <button class="chip on" onclick="setSort(this,'rating')" style="padding:5px 12px;font-size:11px;">Best rated</button>
+              <button class="chip" onclick="setSort(this,'price_asc')" style="padding:5px 12px;font-size:11px;">Price ↑</button>
+              <button class="chip" onclick="setSort(this,'price_desc')" style="padding:5px 12px;font-size:11px;">Price ↓</button>
+            </div>
+          </div>
+        </div>
+        <div class="scroll" style="padding:12px 16px;">
+          <p id="search-count" style="font-size:12px;color:var(--muted);margin-bottom:12px;"></p>
+          <div id="search-list"></div>
+          <div style="height:20px;"></div>
+        </div>
+      </div>
+
+      <!-- ══ HOW IT WORKS PAGE ══ -->
+      <div class="page" id="pg-how">
+        <div class="scroll" style="padding:16px 16px 0;">
+          <h2 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:400;color:var(--cream);margin-bottom:6px;">How it works</h2>
+          <p style="font-size:14px;color:var(--muted);margin-bottom:20px;font-weight:300;">Three steps. No agencies. No confusion.</p>
+
+          <div class="how-step">
+            <div style="text-align:center;">
+              <div class="how-icon">🔍</div>
+              <div style="font-family:'Playfair Display',serif;font-size:28px;color:rgba(255,255,255,.06);">1</div>
+            </div>
+            <div>
+              <div class="how-title">Search</div>
+              <div class="how-desc">Enter your city, music type and date. Browse profiles and read real reviews from venues.</div>
+            </div>
+          </div>
+          <div class="how-step">
+            <div style="text-align:center;">
+              <div class="how-icon">📅</div>
+              <div style="font-family:'Playfair Display',serif;font-size:28px;color:rgba(255,255,255,.06);">2</div>
+            </div>
+            <div>
+              <div class="how-title">Book</div>
+              <div class="how-desc">Check availability and confirm instantly. No waiting, no emails back and forth.</div>
+            </div>
+          </div>
+          <div class="how-step">
+            <div style="text-align:center;">
+              <div class="how-icon">🎶</div>
+              <div style="font-family:'Playfair Display',serif;font-size:28px;color:rgba(255,255,255,.06);">3</div>
+            </div>
+            <div>
+              <div class="how-title">Enjoy</div>
+              <div class="how-desc">Payment held securely. Released after your event. Then leave a review.</div>
+            </div>
+          </div>
+
+          <div style="margin-top:8px;">
+            <div class="sec-lbl" style="margin-bottom:14px;">What people say</div>
+            <div class="rcard"><div style="color:var(--gold);font-size:12px;letter-spacing:2px;margin-bottom:8px;">★★★★★</div><div class="rcard-text">"Found our Friday DJ through Gignow. Booking took five minutes."</div><div class="rcard-author">Marco B. · Bar owner, Zürich</div></div>
+            <div class="rcard"><div style="color:var(--gold);font-size:12px;letter-spacing:2px;margin-bottom:8px;">★★★★★</div><div class="rcard-text">"Hired a jazz trio for our dinner. Guests were speechless. So simple to use."</div><div class="rcard-author">Claudia R. · Events manager, Basel</div></div>
+            <div class="rcard"><div style="color:var(--gold);font-size:12px;letter-spacing:2px;margin-bottom:8px;">★★★★★</div><div class="rcard-text">"Now I update my calendar and bookings come to me. Income doubled in 2 months."</div><div class="rcard-author">David K. · Pianist</div></div>
+          </div>
+          <div style="height:20px;"></div>
+        </div>
+      </div>
+
+      <!-- ══ PROFILE PAGE ══ -->
+      <div class="page" id="pg-profile">
+        <div class="scroll" style="padding:16px 16px;"><div id="profile-content"></div><div style="height:20px;"></div></div>
+      </div>
+
+      <!-- ══ DETAIL PAGE ══ -->
+      <div class="page" id="pg-detail">
+        <div class="scroll" id="detail-scroll">
+          <div id="d-hero" style="position:relative;"></div>
+          <div id="d-body" style="padding:16px 16px 0;"></div>
+          <div style="height:90px;"></div>
+          <div class="sticky-bar" id="d-bar"></div>
+        </div>
+      </div>
+
+      <!-- TOAST -->
+      <div class="toast" id="toast">
+        <span class="toast-icon" id="toast-icon">✅</span>
+        <span class="toast-msg" id="toast-msg"></span>
+      </div>
+
+      <!-- SHEET BACKDROP -->
+      <div class="sheet-wrap" id="sw" onclick="closeSheet()">
+
+        <!-- Booking Sheet -->
+        <div class="sheet" id="book-sheet" onclick="event.stopPropagation()">
+          <div class="sheet-handle"></div>
+          <div class="sheet-title" id="bs-title">Book Artist</div>
+          <div id="bs-artist"></div>
+          <div class="field"><div class="field-lbl">Date</div><input type="date" id="b-date" style="color-scheme:dark;"/></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <div class="field"><div class="field-lbl">Start time</div><input type="time" id="b-time" value="20:00" style="color-scheme:dark;"/></div>
+            <div class="field"><div class="field-lbl">Venue</div><input id="b-venue" placeholder="Bar name"/></div>
+          </div>
+          <div class="field" style="margin-bottom:5px;">
+            <div class="field-lbl" style="margin-bottom:8px;">Duration</div>
+            <div class="dur-btns" id="dur-btns">
+              <button class="dur-btn" onclick="setDur(this,2)">2h</button>
+              <button class="dur-btn on" onclick="setDur(this,3)">3h</button>
+              <button class="dur-btn" onclick="setDur(this,4)">4h</button>
+              <button class="dur-btn" onclick="setDur(this,5)">5h</button>
+              <button class="dur-btn" onclick="setDur(this,6)">6h</button>
+            </div>
+          </div>
+          <div class="total-box" id="total-box"></div>
+          <button class="btn-gold" onclick="submitBooking()">Send booking request</button>
+        </div>
+
+        <!-- Auth Sheet -->
+        <div class="sheet" id="auth-sheet" onclick="event.stopPropagation()">
+          <div class="sheet-handle"></div>
+          <div id="auth-content"></div>
+        </div>
+
+      </div>
+    </div><!-- /screen -->
+
+    <!-- TAB BAR -->
+    <div class="tabbar">
+      <button class="tab on" id="tab-home" onclick="goTab('home')">
+        <span class="tab-icon">♪</span><span class="tab-label">Discover</span>
+      </button>
+      <button class="tab" id="tab-search" onclick="goTab('search')">
+        <span class="tab-icon">⊕</span><span class="tab-label">Search</span>
+      </button>
+      <button class="tab" id="tab-how" onclick="goTab('how')">
+        <span class="tab-icon">◎</span><span class="tab-label">How it works</span>
+      </button>
+      <button class="tab" id="tab-profile" onclick="goTab('profile')">
+        <span class="tab-icon">♡</span><span class="tab-label">Profile</span>
+      </button>
+    </div>
+
+  </div><!-- /phone -->
+
+  <!-- SIDE INFO -->
+  <div class="side-info">
+    <h3>Gignow</h3>
+    <p style="margin-bottom:16px;">Switzerland's live music marketplace</p>
+    <div class="feature"><span>♪</span><span>Discover artists near you</span></div>
+    <div class="feature"><span>⊕</span><span>Search & filter by price</span></div>
+    <div class="feature"><span>◎</span><span>Learn how it works</span></div>
+    <div class="feature"><span>♡</span><span>Sign in & manage bookings</span></div>
+    <p style="margin-top:16px;font-size:11px;color:#4a4642;">Tap any artist to view<br/>their profile and book.</p>
+  </div>
+</div>
+
+<script>
+const ARTISTS=[
+  {id:1,name:"DJ Kemal",type:"DJ",city:"Zürich",genres:"House · Techno · Afro",price:350,rating:4.97,reviews:84,available:true,emoji:"🎧",bg:"#1a1a2e"},
+  {id:2,name:"The Basel Trio",type:"Jazz Band",city:"Basel",genres:"Jazz · Bossa Nova",price:800,rating:5.0,reviews:47,available:true,emoji:"🎷",bg:"#2d1500"},
+  {id:3,name:"Sara Müller",type:"Pianist",city:"Bern",genres:"Classical · Lounge",price:420,rating:4.92,reviews:63,available:true,emoji:"🎹",bg:"#0d0d1a"},
+  {id:4,name:"Groove Collective",type:"Live Band",city:"Zürich",genres:"Funk · Soul · R&B",price:1200,rating:4.88,reviews:39,available:false,emoji:"🎸",bg:"#0a1a0a"},
+  {id:5,name:"Luca Ferretti",type:"Saxophonist",city:"Geneva",genres:"Jazz · Soul · Pop",price:380,rating:4.95,reviews:55,available:true,emoji:"🎺",bg:"#1a0a1a"},
+  {id:6,name:"Alpine Strings",type:"String Quartet",city:"Lucerne",genres:"Classical · Contemporary",price:950,rating:4.90,reviews:28,available:true,emoji:"🎻",bg:"#001a0a"},
+  {id:7,name:"DJ Sofia",type:"DJ",city:"Zürich",genres:"Deep House · Electronic",price:290,rating:4.85,reviews:72,available:true,emoji:"🎧",bg:"#1a1a2e"},
+  {id:8,name:"Piano Bar Marc",type:"Pianist",city:"Basel",genres:"Jazz · Pop · Standards",price:320,rating:4.78,reviews:41,available:true,emoji:"🎹",bg:"#0d0d1a"},
+];
+
+let curTab='home',curArtist=null,prevTab='home',curUser=null;
+let hFilter='',hCity='',sCity='',sType='',sSort='rating',bDur=3,aMode='login',aRole='venue';
+let saved=new Set([1,3]);
+
+// CLOCK
+function tick(){const d=new Date();document.getElementById('clock').textContent=d.getHours()+':'+(d.getMinutes()<10?'0':'')+d.getMinutes();}
+tick();setInterval(tick,15000);
+
+// GREETING
+function setGreeting(){const h=new Date().getHours();document.getElementById('greeting').textContent=h<12?'Good morning 👋':h<18?'Good afternoon 👋':'Good evening 👋';}
+setGreeting();
+
+// TAB NAVIGATION
+function goTab(t){
+  if(curArtist&&t!==curTab){closeDetail();}
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  document.getElementById('pg-'+t).classList.add('on');
+  document.getElementById('tab-'+t).classList.add('on');
+  curTab=t;
+  if(t==='home')renderHome();
+  if(t==='search')renderSearch();
+  if(t==='profile')renderProfile();
+}
+
+// MAKE ARTIST CARD
+function makeCard(a,onClick){
+  const d=document.createElement('div');
+  d.className='acard';
+  d.onclick=onClick;
+  d.innerHTML=`
+    <div class="acard-img" style="background:${a.bg};">
+      <span>${a.emoji}</span>
+      <div style="position:absolute;top:10px;left:10px;"><span class="pill">${a.type}</span></div>
+      ${!a.available?'<div style="position:absolute;top:10px;right:10px;"><span class="pill r">Booked</span></div>':''}
+    </div>
+    <div class="acard-body">
+      <div style="display:flex;justify-content:space-between;margin-bottom:0;">
+        <div class="acard-name">${a.name}</div>
+        <div style="font-size:13px;font-weight:700;color:var(--cream);">★ ${a.rating}</div>
+      </div>
+      <div class="acard-meta">📍 ${a.city} · ${a.genres}</div>
+      <div class="acard-foot">
+        <div class="acard-price">CHF ${a.price} <small>/ eve.</small></div>
+        <div style="font-size:12px;font-weight:700;color:${a.available?'#30d158':'#ff453a'};">
+          ${a.available?'● Available':'● Booked'}
+        </div>
+      </div>
+    </div>`;
+  return d;
+}
+
+// MAKE FEAT CARD
+function makeFeat(a){
+  const d=document.createElement('div');
+  d.className='fcard';
+  d.onclick=()=>openDetail(a);
+  d.innerHTML=`
+    <div class="fcard-img" style="background:${a.bg};">
+      <span>${a.emoji}</span>
+      <div style="position:absolute;bottom:8px;left:8px;"><span class="pill" style="font-size:9px;">${a.type}</span></div>
+    </div>
+    <div class="fcard-body">
+      <div class="fcard-name">${a.name}</div>
+      <div class="fcard-city">${a.city}</div>
+      <div class="fcard-price">CHF ${a.price}</div>
+    </div>`;
+  return d;
+}
+
+// HOME
+function homeFilter(btn,f){
+  hFilter=f;
+  document.querySelectorAll('#home-chips .chip').forEach(c=>c.classList.remove('on'));
+  btn.classList.add('on');
+  renderHome();
+}
+function homeCityFilter(btn,c){
+  hCity=c;
+  document.querySelectorAll('#home-city-chips .chip').forEach(x=>x.classList.remove('on'));
+  btn.classList.add('on');
+  renderHome();
+}
+function renderHome(){
+  let filtered=hFilter?ARTISTS.filter(a=>a.type===hFilter):ARTISTS;
+  if(hCity)filtered=filtered.filter(a=>a.city===hCity);
+  document.getElementById('home-count').textContent=filtered.length+' found';
+  const feat=document.getElementById('feat-row');
+  feat.innerHTML='';
+  ARTISTS.filter(a=>a.available).forEach(a=>feat.appendChild(makeFeat(a)));
+  const list=document.getElementById('home-list');
+  list.innerHTML='';
+  filtered.forEach(a=>list.appendChild(makeCard(a,()=>openDetail(a))));
+}
+
+// SEARCH
+function setCity(btn,c){sCity=c;document.querySelectorAll('#city-chips .chip').forEach(x=>x.classList.remove('on'));btn.classList.add('on');renderSearch();}
+function setType(btn,t){sType=t;document.querySelectorAll('#type-chips .chip').forEach(x=>x.classList.remove('on'));btn.classList.add('on');renderSearch();}
+function setSort(btn,s){sSort=s;document.querySelectorAll('#sort-chips .chip').forEach(x=>x.classList.remove('on'));btn.classList.add('on');renderSearch();}
+function renderSearch(){
+  const q=(document.getElementById('sq')||{value:''}).value.toLowerCase();
+  let res=ARTISTS.filter(a=>{
+    const mq=!q||a.name.toLowerCase().includes(q)||a.genres.toLowerCase().includes(q)||a.city.toLowerCase().includes(q);
+    return mq&&(!sCity||a.city===sCity)&&(!sType||a.type===sType);
+  });
+  if(sSort==='rating')res.sort((a,b)=>b.rating-a.rating);
+  else if(sSort==='price_asc')res.sort((a,b)=>a.price-b.price);
+  else if(sSort==='price_desc')res.sort((a,b)=>b.price-a.price);
+  document.getElementById('search-count').textContent=res.length+' results';
+  const list=document.getElementById('search-list');
+  list.innerHTML='';
+  if(!res.length){list.innerHTML='<div style="text-align:center;padding:40px 0;"><div style="font-size:36px;margin-bottom:10px;">🎵</div><div style="font-family:\'Playfair Display\',serif;font-size:18px;color:var(--cream);margin-bottom:6px;">No results</div><div style="font-size:13px;color:var(--muted);">Try different filters</div></div>';return;}
+  res.forEach(a=>list.appendChild(makeCard(a,()=>openDetail(a))));
+}
+
+// DETAIL
+function openDetail(a){
+  curArtist=a;prevTab=curTab;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById('pg-detail').classList.add('on');
+  document.getElementById('detail-scroll').scrollTop=0;
+  document.getElementById('d-hero').innerHTML=`
+    <div style="height:200px;background:${a.bg};display:flex;align-items:center;justify-content:center;font-size:76px;position:relative;">
+      ${a.emoji}
+      <button class="detail-back" onclick="closeDetail()">‹</button>
+      <div style="position:absolute;bottom:14px;left:14px;"><span class="pill">${a.type}</span></div>
+      <button onclick="toggleSave(${a.id},this)" style="position:absolute;top:14px;right:14px;width:34px;height:34px;background:rgba(0,0,0,.5);border:none;border-radius:50%;font-size:17px;cursor:pointer;backdrop-filter:blur(4px);">${saved.has(a.id)?'❤️':'🤍'}</button>
+    </div>`;
+  document.getElementById('d-body').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
+      <h1 style="font-family:'Playfair Display',serif;font-size:26px;font-weight:400;color:var(--cream);letter-spacing:-.5px;">${a.name}</h1>
+      <div style="text-align:right;"><div style="font-size:14px;font-weight:700;color:var(--gold);">★ ${a.rating}</div><div style="font-size:11px;color:var(--muted);">${a.reviews} reviews</div></div>
+    </div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:18px;">📍 ${a.city} · ${a.genres}</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;">
+      <div class="sbox"><div class="sbox-val">★${a.rating}</div><div class="sbox-lbl">Rating</div></div>
+      <div class="sbox"><div class="sbox-val">${a.reviews}</div><div class="sbox-lbl">Reviews</div></div>
+      <div class="sbox"><div class="sbox-val">${Math.round(a.reviews*2.4)}</div><div class="sbox-lbl">Bookings</div></div>
+    </div>
+    <div class="sec-lbl">About</div>
+    <p style="font-size:14px;font-weight:300;color:rgba(255,255,255,.7);line-height:1.75;margin-bottom:20px;">Professional ${a.type.toLowerCase()} based in ${a.city}. Specialises in ${a.genres.replace(/·/g,'and')}. Available for bars, restaurants, private events and corporate functions.</p>
+    <div class="sec-lbl">Reviews</div>
+    <div class="rcard"><div style="color:var(--gold);font-size:11px;letter-spacing:2px;margin-bottom:7px;">★★★★★</div><div class="rcard-text">"${a.name} was absolutely perfect. Our guests loved every minute of it."</div><div class="rcard-author">Marco B. · Bar owner, Zürich</div></div>
+    <div class="rcard"><div style="color:var(--gold);font-size:11px;letter-spacing:2px;margin-bottom:7px;">★★★★★</div><div class="rcard-text">"Professional, punctual, and incredibly talented. Will definitely book again."</div><div class="rcard-author">Claudia R. · Event organiser</div></div>`;
+  document.getElementById('d-bar').innerHTML=`
+    <div class="sticky-inner">
+      <div><div style="font-size:19px;font-weight:700;color:var(--cream);">CHF ${a.price}</div><div style="font-size:11px;color:var(--muted);">per evening</div></div>
+      <button onclick="${a.available?'openBooking()':'void(0)'}" style="padding:11px 24px;border-radius:12px;border:none;background:${a.available?'var(--gold)':'var(--bg4)'};color:${a.available?'#111':'var(--muted)'};font-size:14px;font-weight:700;cursor:${a.available?'pointer':'not-allowed'};font-family:'DM Sans',sans-serif;">
+        ${a.available?'Book Now':'Unavailable'}
+      </button>
+    </div>`;
+}
+function closeDetail(){
+  curArtist=null;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  document.getElementById('pg-'+prevTab).classList.add('on');
+  document.getElementById('tab-'+prevTab).classList.add('on');
+  curTab=prevTab;
+}
+function toggleSave(id,btn){
+  if(saved.has(id)){saved.delete(id);btn.textContent='🤍';}
+  else{saved.add(id);btn.textContent='❤️';showToast('Saved to favourites');}
+}
+
+// PROFILE
+function renderProfile(){
+  const el=document.getElementById('profile-content');
+  if(!curUser){
+    el.innerHTML=`
+      <div style="text-align:center;padding:48px 0;">
+        <div style="font-size:56px;margin-bottom:16px;">🎵</div>
+        <h2 style="font-family:'Playfair Display',serif;font-size:24px;font-weight:400;color:var(--cream);margin-bottom:10px;">Join Gignow</h2>
+        <p style="font-size:14px;color:var(--muted);line-height:1.65;margin-bottom:28px;">Sign in to book artists and manage your events.</p>
+        <button class="btn-gold" onclick="openAuth('login')">Sign in</button>
+        <button class="btn-outline" onclick="openAuth('register')">Create account</button>
+      </div>`;
+  }else{
+    const bk=[{a:"DJ Kemal",e:"🎧",d:"14 Jun",s:"confirmed"},{a:"Basel Trio",e:"🎷",d:"27 Jun",s:"pending"},{a:"Sara Müller",e:"🎹",d:"5 Jul",s:"confirmed"}];
+    el.innerHTML=`
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:22px;">
+        <div style="width:54px;height:54px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:22px;color:#111;">${curUser.name[0]}</div>
+        <div><div style="font-family:'Playfair Display',serif;font-size:20px;color:var(--cream);">${curUser.name}</div><div style="font-size:13px;color:var(--muted);margin-top:2px;">${curUser.email}</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:22px;">
+        <div class="sbox"><div class="sbox-val">3</div><div class="sbox-lbl">Bookings</div></div>
+        <div class="sbox"><div class="sbox-val">2</div><div class="sbox-lbl">Confirmed</div></div>
+        <div class="sbox"><div class="sbox-val">4.9★</div><div class="sbox-lbl">Avg rating</div></div>
+      </div>
+      <div class="sec-lbl">Your bookings</div>
+      ${bk.map(b=>`
+        <div style="background:var(--bg2);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+          <div style="width:40px;height:40px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:20px;">${b.e}</div>
+          <div style="flex:1;"><div style="font-size:14px;font-weight:600;color:var(--cream);">${b.a}</div><div style="font-size:12px;color:var(--muted);">${b.d}</div></div>
+          <span class="pill ${b.s==='confirmed'?'g':''}" style="${b.s==='pending'?'background:var(--gold2);color:var(--gold);':''}">${b.s}</span>
+        </div>`).join('')}
+      <button class="btn-outline" style="margin-top:14px;color:var(--red);border-color:var(--red);" onclick="signOut()">Sign out</button>`;
+  }
+}
+
+// BOOKING
+function openBooking(){
+  if(!curUser){openAuth('login');return;}
+  document.getElementById('bs-title').textContent='Book '+curArtist.name;
+  document.getElementById('bs-artist').innerHTML=`
+    <div style="display:flex;gap:12px;align-items:center;background:var(--bg3);border-radius:12px;padding:11px 13px;margin-bottom:14px;">
+      <div style="width:44px;height:44px;border-radius:10px;background:${curArtist.bg};display:flex;align-items:center;justify-content:center;font-size:22px;">${curArtist.emoji}</div>
+      <div><div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--cream);">${curArtist.name}</div><div style="font-size:12px;color:var(--muted);">${curArtist.city} · CHF ${curArtist.price}/hr</div></div>
+    </div>`;
+  updateTotal();
+  openSheet('book-sheet');
+}
+function setDur(btn,h){
+  bDur=h;
+  document.querySelectorAll('.dur-btn').forEach(b=>{b.classList.remove('on');b.style.background='var(--bg4)';b.style.color='var(--muted)';});
+  btn.classList.add('on');btn.style.background='var(--gold)';btn.style.color='#111';
+  updateTotal();
+}
+function updateTotal(){
+  if(!curArtist)return;
+  const t=curArtist.price*bDur;
+  document.getElementById('total-box').innerHTML=`
+    <div class="total-row"><span>CHF ${curArtist.price} × ${bDur}h</span><span>CHF ${t}</span></div>
+    <div class="total-row"><span>Platform fee (10%)</span><span>CHF ${Math.round(t*.1)}</span></div>
+    <div class="total-line"></div>
+    <div class="total-final"><span>Total</span><span>CHF ${Math.round(t*1.1)}</span></div>`;
+}
+function submitBooking(){
+  const date=document.getElementById('b-date').value;
+  const venue=document.getElementById('b-venue').value;
+  if(!date||!venue){showToast('Please fill in date and venue','error');return;}
+  closeSheet();
+  setTimeout(()=>showToast('Booking request sent to '+curArtist.name+'!'),200);
+}
+
+// AUTH
+function openAuth(m){
+  aMode=m;
+  renderAuth();
+  openSheet('auth-sheet');
+}
+function renderAuth(){
+  const el=document.getElementById('auth-content');
+  if(aMode==='login'){
+    el.innerHTML=`
+      <div class="sheet-title">Sign in</div>
+      <div class="field"><div class="field-lbl">Email</div><input type="email" id="a-email" placeholder="you@example.com"/></div>
+      <div class="field"><div class="field-lbl">Password</div><input type="password" id="a-pass" placeholder="Password"/></div>
+      <button class="btn-gold" onclick="doLogin()" style="margin-top:4px;">Sign in</button>
+      <p style="text-align:center;font-size:13px;color:var(--muted);margin-top:12px;">No account? <span style="color:var(--gold);cursor:pointer;font-weight:600;" onclick="aMode='register';renderAuth()">Create one</span></p>`;
+  }else{
+    el.innerHTML=`
+      <div class="sheet-title">Create account</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+        <button id="rb-v" class="dur-btn on" onclick="setARole('venue')" style="padding:11px;border-radius:10px;font-size:12px;">🏠 Venue</button>
+        <button id="rb-a" class="dur-btn" onclick="setARole('artist')" style="padding:11px;border-radius:10px;font-size:12px;">🎵 Artist</button>
+      </div>
+      <div class="field"><div class="field-lbl">Full name</div><input type="text" id="a-name" placeholder="Your name"/></div>
+      <div class="field"><div class="field-lbl">Email</div><input type="email" id="a-email" placeholder="you@example.com"/></div>
+      <div class="field"><div class="field-lbl">Password</div><input type="password" id="a-pass" placeholder="Password"/></div>
+      <button class="btn-gold" onclick="doRegister()" style="margin-top:4px;">Create account</button>
+      <p style="text-align:center;font-size:13px;color:var(--muted);margin-top:12px;">Have account? <span style="color:var(--gold);cursor:pointer;font-weight:600;" onclick="aMode='login';renderAuth()">Sign in</span></p>`;
+  }
+}
+function setARole(r){
+  aRole=r;
+  const v=document.getElementById('rb-v'),a=document.getElementById('rb-a');
+  if(r==='venue'){v.classList.add('on');v.style.background='var(--gold)';v.style.color='#111';a.classList.remove('on');a.style.background='var(--bg4)';a.style.color='var(--muted)';}
+  else{a.classList.add('on');a.style.background='var(--gold)';a.style.color='#111';v.classList.remove('on');v.style.background='var(--bg4)';v.style.color='var(--muted)';}
+}
+function doLogin(){
+  const e=document.getElementById('a-email').value,p=document.getElementById('a-pass').value;
+  if(!e||!p){showToast('Fill in all fields','error');return;}
+  curUser={name:e.split('@')[0].replace(/\b\w/g,c=>c.toUpperCase()),email:e,role:'venue'};
+  closeSheet();renderProfile();showToast('Welcome back, '+curUser.name.split(' ')[0]+'!');
+  goTab('profile');
+}
+function doRegister(){
+  const n=document.getElementById('a-name').value,e=document.getElementById('a-email').value,p=document.getElementById('a-pass').value;
+  if(!n||!e||!p){showToast('Fill in all fields','error');return;}
+  curUser={name:n,email:e,role:aRole};
+  closeSheet();renderProfile();showToast('Welcome, '+n.split(' ')[0]+'!');
+  goTab('profile');
+}
+function signOut(){curUser=null;renderProfile();showToast('Signed out');}
+
+// SHEET
+function openSheet(id){
+  document.getElementById('sw').classList.add('on');
+  document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('on'));
+  setTimeout(()=>document.getElementById(id).classList.add('on'),10);
+}
+function closeSheet(){
+  document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('on'));
+  setTimeout(()=>document.getElementById('sw').classList.remove('on'),320);
+}
+
+// TOAST
+let toastTimer;
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  document.getElementById('toast-icon').textContent=type==='error'?'⚠️':'✅';
+  t.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('on'),3000);
+}
+
+// INIT
+renderHome();
+renderSearch();
+renderProfile();
+</script>
+</body>
+</html>
